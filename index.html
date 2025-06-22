@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>D&D Scheduling Calendar</title>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -24,7 +24,33 @@
 
     const calendar = document.getElementById('calendar');
     const monthYear = document.getElementById('monthYear');
+    const toggleBtn = document.getElementById('toggle-dark-mode');
+    const root = document.documentElement;
     let currentDate = new Date();
+
+    function setMode(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        toggleBtn.textContent = 'Switch to Light Mode';
+      } else {
+        root.classList.remove('dark');
+        toggleBtn.textContent = 'Switch to Dark Mode';
+      }
+      localStorage.setItem('darkMode', mode);
+    }
+
+    // Load saved mode or detect system preference
+    const savedMode = localStorage.getItem('darkMode');
+    if (savedMode === 'dark' || (!savedMode && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      setMode('dark');
+    } else {
+      setMode('light');
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      const newMode = root.classList.contains('dark') ? 'light' : 'dark';
+      setMode(newMode);
+    });
 
     function renderCalendar() {
       calendar.innerHTML = '';
@@ -58,6 +84,8 @@
         });
 
         day.addEventListener('click', () => {
+          day.classList.add('red');
+          day.style.pointerEvents = 'none';
           set(dateRef, 'red');
         });
 
@@ -73,6 +101,23 @@
     renderCalendar();
   </script>
   <style>
+    :root {
+      --bg-color: #f4f4f4;
+      --text-color: #000;
+      --day-bg: white;
+      --day-border: #ccc;
+      --day-hover: #ddd;
+      --red: #e74c3c;
+    }
+    .dark {
+      --bg-color: #121212;
+      --text-color: #eee;
+      --day-bg: #1e1e1e;
+      --day-border: #444;
+      --day-hover: #333;
+      --red: #e74c3c;
+    }
+
     body {
       font-family: Arial, sans-serif;
       display: flex;
@@ -80,8 +125,10 @@
       align-items: center;
       flex-direction: column;
       min-height: 100vh;
-      background: #f4f4f4;
+      background: var(--bg-color);
+      color: var(--text-color);
       padding: 10px;
+      transition: background 0.3s, color 0.3s;
     }
     h1 {
       margin-bottom: 10px;
@@ -93,6 +140,19 @@
       justify-content: center;
       flex-wrap: wrap;
       gap: 10px;
+      align-items: center;
+    }
+    #toggle-dark-mode {
+      padding: 6px 12px;
+      cursor: pointer;
+      border: 1px solid var(--day-border);
+      background: var(--day-bg);
+      color: var(--text-color);
+      border-radius: 4px;
+      transition: background 0.3s, color 0.3s;
+    }
+    #toggle-dark-mode:hover {
+      background: var(--day-hover);
     }
     .calendar {
       display: grid;
@@ -103,21 +163,22 @@
     }
     .day {
       aspect-ratio: 1 / 1;
-      background: white;
-      border: 1px solid #ccc;
+      background: var(--day-bg);
+      border: 1px solid var(--day-border);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: background 0.3s;
       font-size: 1.2em;
+      user-select: none;
     }
     .day.red {
-      background-color: #e74c3c;
+      background-color: var(--red);
       color: white;
     }
     .day:hover {
-      background-color: #ddd;
+      background-color: var(--day-hover);
     }
     @media (max-width: 500px) {
       .day {
@@ -133,6 +194,7 @@
     <button onclick="changeMonth(-1)">&#8592; Prev</button>
     <span id="monthYear"></span>
     <button onclick="changeMonth(1)">Next &#8594;</button>
+    <button id="toggle-dark-mode">Toggle Dark Mode</button>
   </div>
   <div class="calendar" id="calendar"></div>
 </body>
