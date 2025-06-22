@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D&D Scheduling Calendar</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      background: #f4f4f4;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    .calendar-controls {
+      margin-bottom: 10px;
+    }
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 100px);
+      gap: 5px;
+    }
+    .day {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .day.red {
+      background-color: #e74c3c;
+      color: white;
+    }
+    .day:hover {
+      background-color: #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>D&D Game Scheduler</h1>
+  <p>Click on a date to mark it as unavailable (red)</p>
+  <div class="calendar-controls">
+    <button onclick="changeMonth(-1)">&#8592; Prev</button>
+    <span id="monthYear"></span>
+    <button onclick="changeMonth(1)">Next &#8594;</button>
+  </div>
+  <div class="calendar" id="calendar"></div>
+
+  <script>
+    const calendar = document.getElementById('calendar');
+    const monthYear = document.getElementById('monthYear');
+    let currentDate = new Date();
+
+    function renderCalendar() {
+      calendar.innerHTML = '';
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      monthYear.textContent = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'day';
+        empty.style.visibility = 'hidden';
+        calendar.appendChild(empty);
+      }
+
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dateKey = `${year}-${month + 1}-${i}`;
+        const day = document.createElement('div');
+        day.className = 'day';
+        day.textContent = i;
+
+        if (localStorage.getItem(dateKey) === 'red') {
+          day.classList.add('red');
+        }
+
+        day.addEventListener('click', () => {
+          day.classList.toggle('red');
+          if (day.classList.contains('red')) {
+            localStorage.setItem(dateKey, 'red');
+          } else {
+            localStorage.removeItem(dateKey);
+          }
+        });
+
+        calendar.appendChild(day);
+      }
+    }
+
+    function changeMonth(offset) {
+      currentDate.setMonth(currentDate.getMonth() + offset);
+      renderCalendar();
+    }
+
+    renderCalendar();
+  </script>
+</body>
+</html>
