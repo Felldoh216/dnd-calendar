@@ -4,6 +4,74 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>D&D Scheduling Calendar</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDvqDVnyzwIV5KinFWhTjmE3bYI_fpDtNk",
+      authDomain: "dnd-calendar-bef60.firebaseapp.com",
+      databaseURL: "https://dnd-calendar-bef60-default-rtdb.firebaseio.com",
+      projectId: "dnd-calendar-bef60",
+      storageBucket: "dnd-calendar-bef60.firebasestorage.app",
+      messagingSenderId: "574283076956",
+      appId: "1:574283076956:web:26b8c141249393f73b5d99",
+      measurementId: "G-NT20RRRXC7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const calendar = document.getElementById('calendar');
+    const monthYear = document.getElementById('monthYear');
+    let currentDate = new Date();
+
+    function renderCalendar() {
+      calendar.innerHTML = '';
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      monthYear.textContent = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'day';
+        empty.style.visibility = 'hidden';
+        calendar.appendChild(empty);
+      }
+
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dateKey = `${year}-${month + 1}-${i}`;
+        const day = document.createElement('div');
+        day.className = 'day';
+        day.textContent = i;
+
+        const dateRef = ref(db, 'calendar/' + dateKey);
+        onValue(dateRef, (snapshot) => {
+          const value = snapshot.val();
+          if (value === 'red') {
+            day.classList.add('red');
+            day.style.pointerEvents = 'none';
+          }
+        });
+
+        day.addEventListener('click', () => {
+          set(dateRef, 'red');
+        });
+
+        calendar.appendChild(day);
+      }
+    }
+
+    window.changeMonth = function(offset) {
+      currentDate.setMonth(currentDate.getMonth() + offset);
+      renderCalendar();
+    };
+
+    renderCalendar();
+  </script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -67,57 +135,5 @@
     <button onclick="changeMonth(1)">Next &#8594;</button>
   </div>
   <div class="calendar" id="calendar"></div>
-
-  <script>
-    const calendar = document.getElementById('calendar');
-    const monthYear = document.getElementById('monthYear');
-    let currentDate = new Date();
-
-    function renderCalendar() {
-      calendar.innerHTML = '';
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-      monthYear.textContent = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
-
-      for (let i = 0; i < firstDay; i++) {
-        const empty = document.createElement('div');
-        empty.className = 'day';
-        empty.style.visibility = 'hidden';
-        calendar.appendChild(empty);
-      }
-
-      for (let i = 1; i <= daysInMonth; i++) {
-        const dateKey = `${year}-${month + 1}-${i}`;
-        const day = document.createElement('div');
-        day.className = 'day';
-        day.textContent = i;
-
-        if (localStorage.getItem(dateKey) === 'red') {
-          day.classList.add('red');
-        }
-
-        day.addEventListener('click', () => {
-          day.classList.toggle('red');
-          if (day.classList.contains('red')) {
-            localStorage.setItem(dateKey, 'red');
-          } else {
-            localStorage.removeItem(dateKey);
-          }
-        });
-
-        calendar.appendChild(day);
-      }
-    }
-
-    function changeMonth(offset) {
-      currentDate.setMonth(currentDate.getMonth() + offset);
-      renderCalendar();
-    }
-
-    renderCalendar();
-  </script>
 </body>
 </html>
