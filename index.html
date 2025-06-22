@@ -13,21 +13,28 @@
       flex-direction: column;
       min-height: 100vh;
       background: #f4f4f4;
+      padding: 10px;
     }
     h1 {
       margin-bottom: 10px;
+      text-align: center;
     }
     .calendar-controls {
       margin-bottom: 10px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     .calendar {
       display: grid;
-      grid-template-columns: repeat(7, 100px);
+      grid-template-columns: repeat(7, 1fr);
       gap: 5px;
+      width: 100%;
+      max-width: 700px;
     }
     .day {
-      width: 100px;
-      height: 100px;
+      aspect-ratio: 1 / 1;
       background: white;
       border: 1px solid #ccc;
       display: flex;
@@ -35,6 +42,7 @@
       justify-content: center;
       cursor: pointer;
       transition: background 0.3s;
+      font-size: 1.2em;
     }
     .day.red {
       background-color: #e74c3c;
@@ -42,6 +50,11 @@
     }
     .day:hover {
       background-color: #ddd;
+    }
+    @media (max-width: 500px) {
+      .day {
+        font-size: 1em;
+      }
     }
   </style>
 </head>
